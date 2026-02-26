@@ -1,7 +1,7 @@
 apt update
 apt install -y zip unzip wget curl jq
 
-cd /mnt/server || { echo "Failed to change directory to /mnt/server"; exit 1; }
+cd /var/www/pterodactyl/mnt/server || { echo "Failed to change directory to /mnt/server"; exit 1; }
 
 # Default version to latest if not set
 BEDROCK_VERSION=${BEDROCK_VERSION:-latest}
