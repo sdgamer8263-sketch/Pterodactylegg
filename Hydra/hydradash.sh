@@ -29,27 +29,68 @@ fi
 
 echo -e "${CYAN}$ascii_art${NC}"
 
+# ---------------------------------------------------------
+# STEP 1: ASK FOR SUBDOMAIN (User Input)
+# ---------------------------------------------------------
+echo -e "${YELLOW}Enter your Subdomain (e.g., panel.yourdomain.com):${NC}"
+read -p "Subdomain: " USER_DOMAIN
+
+if [ -z "$USER_DOMAIN" ]; then
+  echo -e "${RED}Error: No subdomain entered. Exiting...${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}Domain set to: $USER_DOMAIN${NC}"
+echo -e "${BLUE}Starting installation in 3 seconds...${NC}"
+sleep 3
+
+# ---------------------------------------------------------
+# STEP 2: INSTALL DEPENDENCIES
+# ---------------------------------------------------------
 echo -e "${YELLOW}* Installing Dependencies${NC}"
 
 # Update package list and install dependencies
 sudo apt update
-sudo apt install -y curl software-properties-common
+sudo apt install -y curl software-properties-common git
+
+# Install Node.js 20
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install nodejs -y 
-sudo apt install git -y
 
 echo -e "${GREEN}* Installed Dependencies${NC}"
-echo -e "${YELLOW}* Installing Files${NC}"
 
-# Create directory, clone repository, and install files
-# Note: Ensure the repository exists and you have permissions
-git clone https://github.com/draco-labes/oversee-fixed.git && \
-cd oversee-fixed && \
-npm install && \
-npm run seed && \
-npm run createUser && \
-node . 
+# ---------------------------------------------------------
+# STEP 3: CLONE AND INSTALL PANEL
+# ---------------------------------------------------------
+echo -e "${YELLOW}* Installing Skyport Files${NC}"
 
-echo -e "${GREEN}* Installed Files${NC}"
-echo -e "${BLUE}* Starting Skyport${NC}"
-echo -e "${CYAN}* Skyport Installed and Started on Port 3001${NC}"
+# Clone repository
+if [ -d "oversee-fixed" ]; then
+  echo -e "${RED}Directory 'oversee-fixed' already exists. Deleting it to reinstall...${NC}"
+  rm -rf oversee-fixed
+fi
+
+git clone https://github.com/draco-labes/oversee-fixed.git
+cd oversee-fixed || exit
+
+# Install NPM packages
+echo -e "${BLUE}* Running npm install...${NC}"
+npm install
+
+# Seed Database
+echo -e "${BLUE}* Seeding Database...${NC}"
+npm run seed
+
+# Create User
+echo -e "${BLUE}* Creating User...${NC}"
+npm run createUser
+
+# ---------------------------------------------------------
+# STEP 4: START SERVER
+# ---------------------------------------------------------
+echo -e "${GREEN}* Installation Complete!${NC}"
+echo -e "${YELLOW}Your panel is configured for: $USER_DOMAIN${NC}"
+echo -e "${CYAN}* Starting Skyport on Port 3001...${NC}"
+
+# Start the node application
+node .
