@@ -2,12 +2,12 @@
 
 # ASCII Art
 ascii_art="
-  _____ _____   _____          __  __ ______ _____  
- / ____|  __ \ / ____|   /\   |  \/  |  ____|  __ \ 
-| (___ | |  | | |  __   /  \  | \  / | |__  | |__) |
- \___ \| |  | | | |_ | / /\ \ | |\/| |  __| |  _  / 
- ____) | |__| | |__| |/ ____ \| |  | | |____| | \ \ 
-|_____/|_____/ \_____/_/    \_\_|  |_|______|_|  \_\
+  ____  ____   ____    _    __  __ _____ ____  
+ / ___||  _ \ / ___|  / \  |  \/  | ____|  _ \ 
+ \___ \| | | | |  _  / _ \ | |\/| |  _| | |_) |
+  ___) | |_| | |_| |/ ___ \| |  | | |___|  _ < 
+ |____/|____/ \____/_/   \_\_|  |_|_____|_| \_\
+                                               
 "
 
 # Colors
@@ -17,6 +17,11 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
+
+# Helper function for messages (replaces echo_message)
+echo_message() {
+  echo -e "${GREEN}$1${NC}"
+}
 
 # Clear the screen
 clear
@@ -29,68 +34,24 @@ fi
 
 echo -e "${CYAN}$ascii_art${NC}"
 
-# ---------------------------------------------------------
-# STEP 1: ASK FOR SUBDOMAIN (User Input)
-# ---------------------------------------------------------
-echo -e "${YELLOW}Enter your Subdomain (e.g., panel.yourdomain.com):${NC}"
-read -p "Subdomain: " USER_DOMAIN
-
-if [ -z "$USER_DOMAIN" ]; then
-  echo -e "${RED}Error: No subdomain entered. Exiting...${NC}"
-  exit 1
-fi
-
-echo -e "${GREEN}Domain set to: $USER_DOMAIN${NC}"
-echo -e "${BLUE}Starting installation in 3 seconds...${NC}"
-sleep 3
-
-# ---------------------------------------------------------
-# STEP 2: INSTALL DEPENDENCIES
-# ---------------------------------------------------------
-echo -e "${YELLOW}* Installing Dependencies${NC}"
+echo_message "* Installing Dependencies"
 
 # Update package list and install dependencies
 sudo apt update
 sudo apt install -y curl software-properties-common git
-
-# Install Node.js 20
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install nodejs -y 
 
-echo -e "${GREEN}* Installed Dependencies${NC}"
+echo_message "* Installed Dependencies"
 
-# ---------------------------------------------------------
-# STEP 3: CLONE AND INSTALL PANEL
-# ---------------------------------------------------------
-echo -e "${YELLOW}* Installing Skyport Files${NC}"
+echo_message "* Installing Files"
 
-# Clone repository
-if [ -d "oversee-fixed" ]; then
-  echo -e "${RED}Directory 'oversee-fixed' already exists. Deleting it to reinstall...${NC}"
-  rm -rf oversee-fixed
-fi
+# Create directory, clone repository, and install files
+# Added 'git clone' command which was missing
+git clone https://github.com/HydraLabs-beta/panel.git && cd panel && npm install && npm run seed && npm run createUser && node .
 
-git clone https://github.com/draco-labes/oversee-fixed.git
-cd oversee-fixed || exit
+echo_message "* Installed Files"
 
-# Install NPM packages
-echo -e "${BLUE}* Running npm install...${NC}"
-npm install
+echo_message "* Starting Skyport"
 
-# Seed Database
-echo -e "${BLUE}* Seeding Database...${NC}"
-npm run seed
-
-# Create User
-echo -e "${BLUE}* Creating User...${NC}"
-npm run createUser
-
-# ---------------------------------------------------------
-# STEP 4: START SERVER
-# ---------------------------------------------------------
-echo -e "${GREEN}* Installation Complete!${NC}"
-echo -e "${YELLOW}Your panel is configured for: $USER_DOMAIN${NC}"
-echo -e "${CYAN}* Starting Skyport on Port 3001...${NC}"
-
-# Start the node application
-node .
+echo -e "${CYAN}* Skyport Installed and Started on Port 3001${NC}"
